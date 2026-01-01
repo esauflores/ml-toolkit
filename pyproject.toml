@@ -1,0 +1,120 @@
+[project]
+name = "ml-toolkit"
+version = "0.1.0"
+description = "Reproducible ML toolkit using Python 3.12 and uv"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+
+dependencies = [
+  "numpy",
+  "pydantic",
+  "joblib",
+  "json-tricks",
+  "python-dotenv",
+  "rich",
+]
+
+[dependency-groups]
+
+dev = [
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "mypy",
+  "pre-commit",
+  "ipykernel",
+  "jupyter",
+  "marimo",
+  "matplotlib",
+  "seaborn",
+]
+
+data = [
+  "pandas",
+  "polars",
+  "duckdb",
+  "pyarrow",
+  "scipy",
+  "great-expectations",
+  "rapidfuzz",
+  "pillow",
+  "soundfile",
+]
+
+ml = [
+  "scikit-learn",
+  "xgboost",
+  "lightgbm",
+  "catboost",
+  "optuna",
+  "torch",
+  "torchmetrics",
+  "torchvision",
+  "torchaudio",
+]
+
+nlp = [
+  "transformers",
+  "tokenizers",
+  "datasets",
+  "sentence-transformers",
+  "accelerate",
+  "spacy",
+]
+
+serve = [
+  "fastapi",
+  "uvicorn",
+  "bentoml",
+]
+
+dev-data = [
+  { include-group = "dev" },
+  { include-group = "data" },
+  "lovely-numpy",
+]
+
+dev-ml = [
+  { include-group = "dev" },
+  { include-group = "data" },
+  { include-group = "ml" },
+  "lovely-numpy",
+  "lovely-tensors",
+]
+
+dev-nlp = [
+  { include-group = "dev-ml" },
+  { include-group = "nlp" },
+]
+
+dev-serve = [
+  { include-group = "dev" },
+  { include-group = "serve" },
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+  "torch.*",
+  "torchvision.*",
+  "torchmetrics.*",
+  "catboost.*",
+  "xgboost.*",
+  "lightgbm.*",
+]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+
