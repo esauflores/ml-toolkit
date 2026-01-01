@@ -58,7 +58,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --no-install-project --group dev-ml
 
 # ---------- dev-nlp ----------
-FROM base AS dev-nlp
+FROM dev-ml AS dev-nlp
 
 LABEL org.opencontainers.image.source="https://github.com/esauflores/ml-toolkit"
 LABEL org.opencontainers.image.description="Reproducible ML toolkit using Python 3.12 and uv"
