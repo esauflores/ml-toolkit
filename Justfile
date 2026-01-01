@@ -24,9 +24,6 @@ push *targets='':
     docker push {{REGISTRY}}:{{VERSION}}-$t
   done
 
-# Build and push Docker images (all or selected targets)
-release *targets='': (build targets) (push targets)
-
 # Test Docker images 
 test *targets='':
   #!/usr/bin/env bash
@@ -48,6 +45,27 @@ test *targets='':
         ;;
     esac
     echo "✅ $t passed"
+  done
+
+# Clean Docker images
+clean *targets='':
+  #!/usr/bin/env bash
+  set -e
+  for t in {{ if targets == '' { TARGETS } else { targets } }}; do
+    docker rmi {{REGISTRY}}:$t || true
+    docker rmi {{REGISTRY}}:{{VERSION}}-$t || true
+    docker system prune -af
+  done
+
+# Build, test and push Docker images (all or selected targets)
+release *targets='':
+  #!/usr/bin/env bash
+  set -e
+  for t in {{ if targets == '' { TARGETS } else { targets } }}; do
+    just build $t
+    just test $t 
+    just push $t
+    just clean $t
   done
 
 # check updates for tools
