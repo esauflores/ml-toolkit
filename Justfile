@@ -58,11 +58,11 @@ clean *targets='':
   done
   docker image prune -f
 
-
 # Build, test and push Docker images (all or selected targets)
 release *targets='':
   #!/usr/bin/env bash
   set -e
+  just build base
   for t in {{ if targets == '' { TARGETS } else { targets } }}; do
     just build $t
     just test $t 
