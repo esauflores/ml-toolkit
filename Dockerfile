@@ -1,18 +1,18 @@
 # ---------- base ----------
 FROM debian:12.12-slim@sha256:d5d3f9c23164ea16f31852f95bd5959aad1c5e854332fe00f7b3a20fcc9f635c AS base
 
+LABEL org.opencontainers.image.source="https://github.com/esauflores/ml-toolkit"
+LABEL org.opencontainers.image.description="Reproducible ML toolkit using Python 3.12 and uv"
+LABEL org.opencontainers.image.licenses="MIT"
+
 ENV DEBIAN_FRONTEND=noninteractive
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   curl \
   git \
-  unzip \
-  xz-utils \
-  gnupg \
   bash \
-  build-essential \
+  libgomp1 \
   && rm -rf /var/lib/apt/lists/*
 
 # ---------- mise ----------
@@ -22,62 +22,43 @@ ENV MISE_CACHE_DIR="/mise/cache"
 ENV MISE_INSTALL_PATH="/usr/local/bin/mise"
 ENV PATH="/mise/shims:$PATH"
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 RUN curl -fsSL https://mise.run | sh
+COPY src/mise.toml /mise/mise.toml
+RUN mise trust /mise/mise.toml && mise install
 
-COPY mise.toml /mise/mise.toml
-RUN mise trust /mise/mise.toml \
-  && mise install
-
+# ---------- workspace ----------
 ENV UV_PROJECT_ENVIRONMENT="/mise/installs/python/latest"
 ENV PATH="/mise/installs/python/latest/bin:$PATH"
 
+WORKDIR /workspace
+
+COPY src/Justfile .
+
 CMD ["bash"]
 
-# ---------- dev-data ----------
-FROM base AS dev-data
+# ---------- cpu ----------
+FROM base AS cpu
 
-LABEL org.opencontainers.image.source="https://github.com/esauflores/ml-toolkit"
-LABEL org.opencontainers.image.description="Reproducible ML toolkit using Python 3.12 and uv"
-LABEL org.opencontainers.image.licenses="MIT"
+WORKDIR /workspace
 
-WORKDIR /app
-COPY pyproject.toml uv.lock ./
+COPY src/cpu-x86_64/pyproject.toml .
+COPY src/cpu-x86_64/uv.lock .
 
-RUN uv sync --no-install-project --group dev-data
+RUN just install-all
 
-# ---------- dev-ml ----------
-FROM base AS dev-ml
+COPY src/cpu-x86_64/tests/ ./tests/
 
-LABEL org.opencontainers.image.source="https://github.com/esauflores/ml-toolkit"
-LABEL org.opencontainers.image.description="Reproducible ML toolkit using Python 3.12 and uv"
-LABEL org.opencontainers.image.licenses="MIT"
+# ---------- gpu ----------
+FROM base AS gpu
 
-WORKDIR /app
-COPY pyproject.toml uv.lock ./
+WORKDIR /workspace
 
-RUN uv sync --no-install-project --group dev-ml
+COPY src/gpu-x86_64/pyproject.toml .
+COPY src/gpu-x86_64/uv.lock .
 
-# ---------- dev-nlp ----------
-FROM dev-ml AS dev-nlp
+RUN just install-all
 
-LABEL org.opencontainers.image.source="https://github.com/esauflores/ml-toolkit"
-LABEL org.opencontainers.image.description="Reproducible ML toolkit using Python 3.12 and uv"
-LABEL org.opencontainers.image.licenses="MIT"
-
-WORKDIR /app
-COPY pyproject.toml uv.lock ./
-
-RUN uv sync --no-install-project --group dev-nlp
-
-# ---------- dev-serve ----------
-FROM base AS dev-serve
-
-LABEL org.opencontainers.image.source="https://github.com/esauflores/ml-toolkit"
-LABEL org.opencontainers.image.description="Reproducible ML toolkit using Python 3.12 and uv"
-LABEL org.opencontainers.image.licenses="MIT"
-
-WORKDIR /app
-COPY pyproject.toml uv.lock ./
-
-RUN uv sync --no-install-project  --group dev-serve
+COPY src/gpu-x86_64/tests/ ./tests/
 

@@ -1,0 +1,113 @@
+[project]
+name = "ml-toolkit"
+version = "0.1.0"
+description = "Reproducible ML toolkit using Python 3.12 and uv"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+dependencies = []
+
+[dependency-groups]
+core = ["numpy", "pydantic", "joblib", "json-tricks", "python-dotenv", "rich"]
+
+dev = [
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "mypy",
+  "pre-commit",
+  "ipykernel",
+  "jupyter",
+  "marimo",
+]
+
+viz = ["matplotlib", "seaborn"]
+
+data = [
+  "pandas",
+  "polars",
+  "duckdb",
+  "pyarrow",
+  "scipy",
+  "great-expectations",
+  "rapidfuzz",
+  "pillow",
+  "soundfile",
+]
+
+ml = [
+  "scikit-learn",
+  "xgboost",
+  "lightgbm",
+  "catboost",
+  "optuna",
+  "torch",
+  "torchmetrics",
+  "torchvision",
+  "torchaudio",
+]
+
+nlp = [
+  "transformers",
+  "tokenizers",
+  "datasets",
+  "sentence-transformers",
+  "accelerate",
+  "spacy",
+]
+
+serve = ["fastapi", "uvicorn", "bentoml"]
+
+all = [
+  { include-group = "core" },
+  { include-group = "dev" },
+  { include-group = "viz" },
+  { include-group = "data" },
+  { include-group = "ml" },
+  { include-group = "nlp" },
+  { include-group = "serve" },
+  "lovely-numpy",
+  "lovely-tensors",
+]
+
+# ---------- tools config ----------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+  "torch.*",
+  "torchvision.*",
+  "torchmetrics.*",
+  "catboost.*",
+  "xgboost.*",
+  "lightgbm.*",
+]
+ignore_errors = true
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+# ---------- tools index ----------
+[tool.uv]
+required-environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+torchvision = [{ index = "pytorch-cu128" }]
+torchaudio = [{ index = "pytorch-cu128" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

@@ -5,17 +5,10 @@ description = "Reproducible ML toolkit using Python 3.12 and uv"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = { text = "MIT" }
-
-dependencies = [
-  "numpy",
-  "pydantic",
-  "joblib",
-  "json-tricks",
-  "python-dotenv",
-  "rich",
-]
+dependencies = []
 
 [dependency-groups]
+core = ["numpy", "pydantic", "joblib", "json-tricks", "python-dotenv", "rich"]
 
 dev = [
   "pytest",
@@ -26,9 +19,9 @@ dev = [
   "ipykernel",
   "jupyter",
   "marimo",
-  "matplotlib",
-  "seaborn",
 ]
+
+viz = ["matplotlib", "seaborn"]
 
 data = [
   "pandas",
@@ -44,7 +37,7 @@ data = [
 
 ml = [
   "scikit-learn",
-  "xgboost",
+  "xgboost-cpu",
   "lightgbm",
   "catboost",
   "optuna",
@@ -63,36 +56,21 @@ nlp = [
   "spacy",
 ]
 
-serve = [
-  "fastapi",
-  "uvicorn",
-  "bentoml",
-]
+serve = ["fastapi", "uvicorn", "bentoml"]
 
-dev-data = [
+all = [
+  { include-group = "core" },
   { include-group = "dev" },
-  { include-group = "data" },
-  "lovely-numpy",
-]
-
-dev-ml = [
-  { include-group = "dev" },
+  { include-group = "viz" },
   { include-group = "data" },
   { include-group = "ml" },
+  { include-group = "nlp" },
+  { include-group = "serve" },
   "lovely-numpy",
   "lovely-tensors",
 ]
 
-dev-nlp = [
-  { include-group = "dev-ml" },
-  { include-group = "nlp" },
-]
-
-dev-serve = [
-  { include-group = "dev" },
-  { include-group = "serve" },
-]
-
+# ---------- tools config ----------
 [tool.ruff]
 line-length = 100
 target-version = "py312"
@@ -118,3 +96,18 @@ ignore_errors = true
 addopts = "-ra -q"
 testpaths = ["tests"]
 
+# ---------- tools index ----------
+[tool.uv]
+required-environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+torchvision = [{ index = "pytorch-cu128" }]
+torchaudio = [{ index = "pytorch-cu128" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

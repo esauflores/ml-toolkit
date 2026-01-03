@@ -1,6 +1,6 @@
 REGISTRY := "ghcr.io/esauflores/ml-toolkit"
-VERSION  := "1.0"
-TARGETS  := "dev-data dev-ml dev-nlp dev-serve"
+VERSION  := "1.1"
+TARGETS  := "cpu gpu"
 
 default:
   @just --list
@@ -31,17 +31,18 @@ test *targets='':
   for t in {{ if targets == '' { TARGETS } else { targets } }}; do
     echo "🧪 Testing $t"
     case $t in
-      dev-data)
-        docker run --rm {{REGISTRY}}:$t python -c "import pandas; print(f'pandas {pandas.__version__}')"
+      cpu|gpu)
+        docker run --rm {{REGISTRY}}:$t \
+          bash -c "
+            set -ex
+            python --version 
+            uv --version
+            just test
+          "
         ;;
-      dev-ml)
-        docker run --rm {{REGISTRY}}:$t python -c "import torch; print(f'torch {torch.__version__}')"
-        ;;
-      dev-nlp)
-        docker run --rm {{REGISTRY}}:$t python -c "import torch; print(f'torch {torch.__version__}')"
-        ;;
-      dev-serve)
-        docker run --rm {{REGISTRY}}:$t python -c "from fastapi import FastAPI; print('fastapi works')"
+      *)
+        echo "❌ Unknown target: $t"
+        exit 1
         ;;
     esac
     echo "✅ $t passed"
@@ -54,8 +55,9 @@ clean *targets='':
   for t in {{ if targets == '' { TARGETS } else { targets } }}; do
     docker rmi {{REGISTRY}}:$t || true
     docker rmi {{REGISTRY}}:{{VERSION}}-$t || true
-    docker system prune -af
   done
+  docker image prune -f
+
 
 # Build, test and push Docker images (all or selected targets)
 release *targets='':

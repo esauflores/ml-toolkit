@@ -1,0 +1,20 @@
+default:
+  @just --list
+
+install-dev-data:
+  uv sync --no-install-project --group core --group dev \
+    --group data --group viz
+
+install-dev-ml:
+  uv sync --no-install-project --group core --group dev \
+    --group data --group viz --group ml
+
+install-dev-nlp:
+  uv sync --no-install-project --group core --group dev \
+    --group data --group viz --group ml --group nlp
+
+install-all:
+  uv sync --no-install-project --group all
+
+test:
+  uv run python -B -m pytest
