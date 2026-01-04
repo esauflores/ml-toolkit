@@ -1,10 +1,17 @@
 # ML Toolkit – Reproducible ML Environment
 
+[![GHCR](https://img.shields.io/badge/container-ghcr.io-blue)](https://github.com/esauflores/ml-toolkit/pkgs/container/ml-toolkit)
+
 A reproducible, Docker-based **machine learning environment** built with **mise**, **uv**, and **just**.
 
 This project provides **deterministic CPU and GPU ML environments** that can be built, tested, and used consistently across local machines and CI systems — without relying on host-installed Python, CUDA, or ML tooling.
 
 The goal is simple: **reproducible ML environments, zero local setup pain**.
+
+| Image | Description                       | Target Hardware | Pull                                            |
+| ----- | --------------------------------- | --------------- | ----------------------------------------------- |
+| `cpu` | Full ML toolkit (CPU-only)        | x86_64 / CPU    | `docker pull ghcr.io/esauflores/ml-toolkit:cpu` |
+| `gpu` | Full ML toolkit with CUDA support | NVIDIA GPU      | `docker pull ghcr.io/esauflores/ml-toolkit:gpu` |
 
 ---
 
@@ -47,16 +54,15 @@ It exists to provide a **known-good ML runtime**.
 ├── Dockerfile
 ├── Justfile
 └── src/
+├───  Justfile
 ├───  mise.toml
 ├───  cpu-x86_64/
 │ ├── pyproject.toml
 │ ├── uv.lock
-│ ├── Justfile
 │ └── tests/
 └── gpu-x86_64/
 ├── pyproject.toml
 ├── uv.lock
-├── Justfile
 └── tests/
 ```
 
@@ -90,7 +96,6 @@ Tests in this project are **environment-level tests**, not application tests.
 They validate that:
 
 - Python is installed correctly
-- Native runtime libraries are present (e.g. OpenMP)
 - ML libraries import successfully
 - CPU/GPU capabilities are detected correctly
 
